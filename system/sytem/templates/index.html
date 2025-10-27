@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gear Up Bikes </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+    <header class="bg-white shadow-md">
+        <nav class="container mx-auto px-6 py-3">
+            <div class="flex items-center justify-between">
+                <div class="text-xl font-semibold text-gray-800">
+                    <a href="{{ url_for('index') }}" class="hover:text-blue-600">Gear Up Bikes</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{{ url_for('products') }}" class="text-gray-600 hover:text-blue-600 transition duration-150">Shop</a>
+                    <a href="{{ url_for('contact') }}" class="text-gray-600 hover:text-blue-600 transition duration-150">Contact</a>
+                    <a href="{{ url_for('view_cart') }}" class="relative text-gray-600 hover:text-blue-600 transition duration-150">
+
+                        {
+                            <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">{{ cart_size }}</span>
+
+                    </a>
+
+                        <span class="text-gray-800">Hello, **{{ username }}**</span>
+                        <a href="{{ url_for('logout') }}" class="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-150">Logout</a>
+
+                        <a href="{{ url_for('login') }}" class="text-gray-600 hover:text-blue-600 transition duration-150">Login</a>
+                        <a href="{{ url_for('register') }}" class="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-150">Register</a>
+
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-8 flex-grow">
+
+    <div class="text-center py-20 bg-white rounded-lg shadow-xl">
+        <h1 class="text-5xl font-extrabold text-gray-900 mb-4">
+            Welcome to **{{ shop_name }}**!
+        </h1>
+        <p class="text-xl text-gray-600 mb-8">
+            Your destination for high-quality bikes and cycling gear.
+        </p>
+        <div class="space-x-4">
+            <a href="{{ url_for('products') }}" class="inline-block px-8 py-3 bg-blue-600 text-white text-lg font-medium rounded-lg hover:bg-blue-700 transition duration-300 shadow-lg">
+                Start Shopping Now!
+            </a>
+        </div>
+    </div>
+
+    </main>
+
+    <footer class="bg-white shadow-md mt-auto">
+        <div class="container mx-auto px-6 py-4 text-center text-gray-600">
+            &copy; 2025 Gear Up Bikes. All rights reserved.
+        </div>
+    </footer>
+
+</body>
+</html>
