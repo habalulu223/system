@@ -1,62 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Gear Up Bikes - {% block title %}Shop{% endblock %}</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-        }
-        .shadow-3xl {
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 10px 0 rgba(0, 0, 0, 0.05);
-        }
-    </style>
-</head>
-<body class="bg-gray-50 min-h-screen flex flex-col">
+{% extends "base.html" %}
 
-        <header class="bg-white shadow-lg sticky top-0 z-20">
-        <nav class="container mx-auto px-6 py-4">
-            <div class="flex items-center justify-between">
-                <div class="text-2xl font-extrabold text-gray-900 tracking-wide">
-                    <a href="{{ url_for('index') }}" class="hover:text-blue-700 transition duration-200">Gear Up Bikes</a>
-                </div>
-                <div class="flex items-center space-x-7">
-                    <a href="{{ url_for('products') }}" class="text-gray-600 font-medium hover:text-blue-700 transition duration-200">Shop</a>
-                    <a href="{{ url_for('contact') }}" class="text-gray-600 font-medium hover:text-blue-700 transition duration-200">Contact</a>
-                    <a href="{{ url_for('view_cart') }}" class="relative text-gray-600 hover:text-blue-700 transition duration-200 p-1 flex items-center space-x-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.72a2 2 0 0 0 2-1.58L23.95 5.51"/></svg>
-                        <span class="font-medium">Cart</span>
-                        {% if cart_size and cart_size > 0 %}
-                        <span class="absolute -top-1 right-0 inline-flex items-center justify-center h-5 w-5 text-xs font-bold text-white bg-red-600 border-2 border-white rounded-full">
-                            {{ cart_size }}
-                        </span>
-                        {% endif %}
-                    </a>
-              _       {% if username %}
-                        <span class="text-gray-900 font-medium">Hello, <strong class="text-blue-600">{{ username }}</strong></span>
-                        <a href="{{ url_for('logout') }}" class="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition duration-200 shadow-md hover:shadow-lg">Logout</a>
-                    {% else %}
-                        <a href="{{ url_for('login') }}" class="text-gray-600 font-medium hover:text-blue-700 transition duration-200">Login</a>
-                        <a href="{{ url_for('register') }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition duration-200 shadow-md hover:shadow-lg">Register</a>
-    _               {% endif %}
-                </div>
-            </div>
-        </nav>
-    </header>
+{% block title %}
+    {% if form_type == 'register' %}Register{% else %}Login{% endif %}
+{% endblock %}
 
-        <main class="container mx-auto px-6 py-12 flex-grow flex items-center justify-center">
-        {% block content %}
-                {% endblock %}
-    </main>
+{% block header_title %}
+    {% if form_type == 'register' %}
+        Gear Up Bikes - Register
+    {% else %}
+        Gear Up Bikes - Login
+    {% endif %}
+{% endblock %}
 
-        <footer class="bg-white shadow-inner mt-auto">
-        <div class="container mx-auto px-6 py-4 text-center text-gray-500 text-sm">
-            &copy; 2025 Gear Up Bikes. All rights reserved.
-        </div>
-    </footer>
 
-</body>
-</html>
+{% block content %}
+<section>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% if form_type == 'register' %}
+        <h2>Create your account:</h2>
+    {% else %}
+        <h2>Please log in to continue:</h2>
+    {% endif %}
+
+    <form method="POST">
+        <div>
+            <input type="text" id="username" name="username" placeholder="Enter your username" required>
+        </div>
+        <div>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+        </div>
+        
+        <button type="submit">
+            {% if form_type == 'register' %}
+                Register
+            {% else %}
+                Login
+            {% endif %}
+        </button>
+    </form>
+    
+    <div style="margin-top: 20px;">
+        {% if form_type == 'register' %}
+            <p>
+                Already have an account? 
+                <a href="{{ url_for('login') }}">Login here</a>
+            </p>
+        {% else %}
+            <p>
+                Don't have an account? 
+                <a href="{{ url_for('register') }}">Register here</a>
+            </p>
+        {% endif %}
+    </div>
+
+</section>
+{% endblock %}

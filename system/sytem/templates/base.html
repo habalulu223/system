@@ -3,53 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gear Up Bikes - {% block title %}{% endblock %}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Gear Up Bikes - {% block title %}Login{% endblock %}</title>
     <style>
-        .transition-all {
-            transition: all 0.2s ease-in-out;
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: white;
+            text-align: center;
+            padding-bottom: 80px;
+            min-height: 100vh;
+            box-sizing: border-box;
         }
+        header {
+            background-color: #0560f2;
+            color: white;
+            padding: 15px;
+            font-size: 25px;
+        }
+        section {
+            padding: 50px;
+        }
+        footer {
+            background-color: #0e2a57;
+            color: white;
+            padding: 20px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            padding: 10px;
+            font-size: 16px;
+            margin: 10px 0;
+            width: 300px;
+            max-width: 90%;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #0B64C3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0560f2;
+        }
+
+        .flash {
+            padding: 10px;
+            margin: 10px auto;
+            width: 300px;
+            max-width: 90%;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .flash.danger { background-color: #f8d7da; color: #721c24; }
+        .flash.success { background-color: #d4edda; color: #155724; }
+        .flash.warning { background-color: #fff3cd; color: #856404; }
+        .flash.info { background-color: #d1ecf1; color: #0c5460; }
+
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col font-sans">
-
-    <header class="bg-white shadow-md sticky top-0 z-10">
-        <nav class="container mx-auto px-6 py-3">
-            <div class="flex items-center justify-between">
-                <div class="text-2xl font-extrabold text-blue-600">
-                    <a href="{{ url_for('index') }}" class="hover:text-blue-800 transition-all">Gear Up Bikes</a>
-                </div>
-                <div class="flex items-center space-x-6">
-                    <a href="{{ url_for('products') }}" class="text-gray-600 hover:text-blue-600 transition-all font-medium">Shop</a>
-                    <a href="{{ url_for('contact') }}" class="text-gray-600 hover:text-blue-600 transition-all font-medium">Contact</a>
-
-                    <a href="{{ url_for('view_cart') }}" class="relative text-gray-600 hover:text-blue-600 transition-all">
-                        🛒 Cart
-                        {% if cart_size and cart_size > 0 %}
-                            <span class="absolute -top-1 -right-4 inline-flex items-center justify-center w-5 h-5 text-xs font-bold leading-none text-white bg-red-600 rounded-full transform translate-x-1/2 -translate-y-1/2">{{ cart_size }}</span>
-                        {% endif %}
-                    </a>
-
-                    {% if username %}
-                        <span class="text-gray-800 font-medium">Hello, <span class="font-bold text-blue-600">{{ username }}</span></span>
-                        <a href="{{ url_for('logout') }}" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all shadow-md">Logout</a>
-                    {% else %}
-                        <a href="{{ url_for('login') }}" class="text-gray-600 hover:text-blue-600 transition-all font-medium">Login</a>
-                        <a href="{{ url_for('register') }}" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all shadow-md">Register</a>
-                    {% endif %}
-                </div>
-            </div>
-        </nav>
+<body>
+    <header>
+        {% block header_title %}
+            Gear Up Bikes - Login
+        {% endblock %}
     </header>
 
-    <main class="container mx-auto px-6 py-8 flex-grow">
-        {% block content %}{% endblock %}
+    <main>
+        {% block content %}
+        {% endblock %}
     </main>
 
-    <footer class="bg-white shadow-md mt-auto">
-        <div class="container mx-auto px-6 py-4 text-center text-gray-600 text-sm">
-            &copy; 2025 Gear Up Bikes. All rights reserved.
-        </div>
+    <footer>
+        &copy; 2025 Gear Up Bikes. All Rights Reserved
     </footer>
 
 </body>

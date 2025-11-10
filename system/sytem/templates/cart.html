@@ -1,100 +1,115 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gear Up Bikes - Your Cart</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .transition-all {
-            transition: all 0.2s ease-in-out;
-        }
-    </style>
-</head>
-<body class="bg-gray-100 min-h-screen flex flex-col font-sans">
+{% extends "layout.html" %}
 
-    <header class="bg-white shadow-md sticky top-0 z-10">
-        <nav class="container mx-auto px-6 py-3">
-            <div class="flex items-center justify-between">
-                <div class="text-2xl font-extrabold text-blue-600">
-                    <a href="{{ url_for('index') }}" class="hover:text-blue-800 transition-all">Gear Up Bikes</a>
-                </div>
-                <div class="flex items-center space-x-6">
-                    <a href="{{ url_for('products') }}" class="text-gray-600 hover:text-blue-600 transition-all font-medium">Shop</a>
-                    <a href="{{ url_for('contact') }}" class="text-gray-600 hover:text-blue-600 transition-all font-medium">Contact</a>
+{% block title %}Your Cart{% endblock %}
 
-                    <a href="{{ url_for('view_cart') }}" class="relative text-gray-600 hover:text-blue-600 transition-all">
-                        🛒 Cart
-                        {% if cart_size and cart_size > 0 %}
-                            <span class="absolute -top-1 -right-4 inline-flex items-center justify-center w-5 h-5 text-xs font-bold leading-none text-white bg-red-600 rounded-full transform translate-x-1/2 -translate-y-1/2">{{ cart_size }}</span>
-                        {% endif %}
-                    </a>
+{% block head_extra %}
+<style>
+    .cart-layout {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+        align-items: flex-start;
+    }
+    .cart-items-card, .cart-summary-card {
+        background-color: var(--color-white);
+        border-radius: 8px;
+        box-shadow: var(--shadow-sm);
+        padding: 1.5rem;
+    }
+    .cart-item {
+        display: flex;
+        gap: 1rem;
+        padding: 1.5rem 0;
+        border-bottom: 1px solid var(--color-border);
+    }
+    .cart-item:first-child { padding-top: 0; }
+    .cart-item:last-child { border-bottom: none; }
 
-                    {% if username %}
-                        <span class="text-gray-800 font-medium">Hello, <span class="font-bold text-blue-600">{{ username }}</span></span>
-                        <a href="{{ url_for('logout') }}" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all shadow-md">Logout</a>
-                    {% else %}
-                        <a href="{{ url_for('login') }}" class="text-gray-600 hover:text-blue-600 transition-all font-medium">Login</a>
-                        <a href="{{ url_for('register') }}" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all shadow-md">Register</a>
-                    {% endif %}
+    .cart-item img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 5px;
+    }
+    .cart-item-info {
+        flex-grow: 1;
+    }
+    .cart-item-info h4 { margin: 0 0 0.25rem 0; font-size: 1.15rem; }
+    .cart-item-info .price { color: var(--color-text-light); }
 
-                </div>
-            </div>
-        </nav>
-    </header>
+    .cart-item-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+    }
+    .cart-item-actions input {
+        width: 60px;
+        padding: 0.5rem;
+        text-align: center;
+    }
+    .cart-total {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--color-secondary);
+        margin-bottom: 1.5rem;
+    }
+    .cart-summary-card .btn {
+        width: 100%;
+    }
+    .empty-cart {
+        text-align: center;
+        padding: 3rem;
+        font-size: 1.2rem;
+        color: var(--color-text-light);
+    }
+</style>
+{% endblock %}
 
-    <main class="container mx-auto px-6 py-8 flex-grow">
+{% block content %}
+    <h1 style="margin-bottom: 2rem;">Your Shopping Cart</h1>
 
-        <h1 class="text-4xl font-bold text-gray-800 mb-8">Your Cart</h1>
-
-        {% if cart_items %}
-            <div class="bg-white p-6 rounded-lg shadow-xl">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subtotal</th>
-                            <th class="relative px-6 py-3">
-                                <span class="sr-only">Remove</span>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-
-                        {% for item in cart_items %}
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ item.name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.quantity }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${{ "%.2f"|format(item.price) }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800">${{ "%.2f"|format(item.price * item.quantity) }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <form method="POST" action="{{ url_for('remove_from_cart', product_id=item.id) }}">
-                                    <button type="submit" class="text-red-600 hover:text-red-900">Remove</button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% endfor %} </tbody>
-                </table>
-
-                <div class="mt-8 pt-4 border-t border-gray-200 flex justify-end">
-                    <p class="text-xl font-bold text-gray-800">Total: ${{ "%.2f"|format(total) }}</p>
-                </div>
-
-            </div>
-        {% else %}
-            <div class="text-center py-12 bg-white rounded-lg shadow-lg">
-                <p class="text-2xl text-gray-600">Your cart is empty!</p>
-                <a href="{{ url_for('products') }}" class="mt-4 inline-block px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-all">Start Shopping</a>
-            </div>
-        {% endif %} </main>
-
-    <footer class="bg-white shadow-md mt-auto">
-        <div class="container mx-auto px-6 py-4 text-center text-gray-600 text-sm">
-            &copy; 2025 Gear Up Bikes. All rights reserved.
+    {% if not cart_items %}
+        <div class="cart-items-card empty-cart">
+            <p>Your cart is empty.</p>
+            <a href="{{ url_for('products') }}" class="btn btn-primary" style="margin-top: 1rem;">Start Shopping</a>
         </div>
-    </footer>
+    {% else %}
+        <div class="cart-layout">
+            <div class="cart-items-card">
+                {% for item in cart_items %}
+                <div class="cart-item">
+                    <img src="{{ url_for('static', filename=item.bike.image_url) }}" alt="{{ item.bike.name }}">
+                    <div class="cart-item-info">
+                        <h4>{{ item.bike.name }}</h4>
+                        <p class="price">${{ "{:,.2f}".format(item.bike.price) }} (Each)</p>
+                        <p style="font-weight: 600;">Total: ${{ "{:,.2f}".format(item.bike.price * item.quantity) }}</p>
+                    </div>
 
-</body>
-</html>
+                    <div style="text-align: right;">
+                        <form method="POST" action="{{ url_for('update_cart', item_id=item.id) }}" class="cart-item-actions">
+                            <label for="quantity">Qty:</label>
+                            <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="form-control" style="padding: 0.5rem;">
+                            <button type="submit" class="btn btn-secondary">Update</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('remove_from_cart', item_id=item.id) }}" style="margin-top: 0.5rem;">
+                            <button type="submit" class="btn-danger" style="font-size: 0.9rem; padding: 0.25rem 0.75rem;">Remove</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="cart-summary-card">
+                <h3>Order Summary</h3>
+                <h2 class="cart-total">Subtotal: ${{ "{:,.2f}".format(total) }}</h2>
+                <p style="color: var(--color-text-light); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                    Taxes and shipping calculated at checkout.
+                </p>
+                <a href="{{ url_for('checkout') }}" class="btn btn-success" style="font-size: 1.1rem; padding: 0.8rem;">
+                    Proceed to Checkout
+                </a>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
