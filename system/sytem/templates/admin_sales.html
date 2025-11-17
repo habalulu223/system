@@ -1,0 +1,87 @@
+{% extends "layout.html" %}
+
+{% block title %}Admin - Sales History{% endblock %}
+
+{% block head_extra %}
+<style>
+    .order-card {
+        background-color: var(--color-white);
+        border-radius: 8px;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 1.5rem;
+    }
+    .order-header {
+        background-color: var(--color-bg);
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--color-border);
+    }
+    .order-header h3 {
+        margin: 0;
+    }
+    .order-body {
+        padding: 1.5rem;
+    }
+    .order-items-list {
+        list-style: none;
+        margin: 1rem 0 0 1.5rem;
+        border-left: 2px solid var(--color-primary);
+    }
+    .order-items-list li {
+        padding: 0.5rem 1rem;
+        position: relative;
+    }
+    .order-items-list li::before {
+        content: '';
+        position: absolute;
+        left: -8px;
+        top: 14px;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: var(--color-primary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <h1 style="color: var(--color-white); text-shadow: 0 1px 3px rgba(0,0,0,0.3);">Sales History</h1>
+    
+    {% if orders %}
+        {% for order in orders %}
+            <div class="order-card">
+                <div class="order-header">
+                    <div>
+                        <h3>Order #{{ order.id }}</h3>
+                        <span style="color: var(--color-text-light);">
+                            Placed by: <strong>{{ order.user.username }}</strong> ({{ order.user.email }})
+                        </span>
+                    </div>
+                    <div style="text-align: right;">
+                        <h3 style="color: var(--color-success);">${{ "%.2f"|format(order.total_price) }}</h3>
+                        <span style="color: var(--color-text-light); font-size: 0.9rem;">
+                            {{ order.order_date.strftime('%Y-%m-%d %I:%M %p') }}
+                        </span>
+                    </div>
+                </div>
+                <div class="order-body">
+                    <strong>Items Purchased:</strong>
+                    <ul class="order-items-list">
+                        {% for item in order.order_items %}
+                            <li>
+                                <strong>{{ item.quantity }}x</strong>
+                                {{ item.bike_name }}
+                                <span style="color: var(--color-text-light);">(at ${{ "%.2f"|format(item.price) }} each)</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="admin-card" style="text-align: center;">
+            <p style="font-size: 1.1rem; color: var(--color-text-light); margin: 0;">There are no sales records yet.</p>
+        </div>
+    {% endif %} {% endblock %}

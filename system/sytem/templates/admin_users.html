@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block title %}Admin - All Users{% endblock %}
+
+{% block content %}
+    <h1 style="color: var(--color-white); text-shadow: 0 1px 3px rgba(0,0,0,0.3);">Manage Users</h1>
+
+    <div class="admin-card">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Is Admin?</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        {% if user.is_admin %}
+                            <span style="color: var(--color-danger); font-weight: 700;">Yes</span>
+                        {% else %}
+                            No
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

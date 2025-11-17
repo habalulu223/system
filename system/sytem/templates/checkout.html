@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+
+{% block title %}Checkout{% endblock %}
+
+{% block content %}
+    <h1 style="text-align: center; color: var(--color-white); text-shadow: 0 1px 3px rgba(0,0,0,0.3); margin-bottom: 2rem;">Checkout</h1>
+    
+    <div class="cart-layout">
+        <div class="form-card" style="margin-top: 0;">
+            <h2 style="text-align: left;">Payment Details</h2>
+            <p style="color: var(--color-text-light); margin-top: -1.5rem; margin-bottom: 2rem;">
+                This is a simulated payment. No real transaction will occur.
+            </p>
+            <form method="POST" action="{{ url_for('checkout') }}">
+                <div class="form-group">
+                    <label for="card_name">Name on Card</label>
+                    <input type="text" name="card_name" id="card_name" class="form-control" required>
+                </div>
+                 <div class="form-group">
+                    <label for="card_number">Card Number</label>
+                    <input type="text" name="card_number" id="card_number" class="form-control" placeholder="0000 0000 0000 0000" required>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <div class="form-group" style="flex: 1;">
+                        <label for="expiry">Expiry (MM/YY)</label>
+                        <input type="text" name="expiry" id="expiry" class="form-control" placeholder="MM/YY" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label for="cvc">CVC</label>
+                        <input type="text" name="cvc" id="cvc" class="form-control" placeholder="123" required>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-success" style="font-size: 1.1rem; padding: 0.8rem;">
+                    Pay ${{ "{:,.2f}".format(grand_total) }} (Demo)
+                </Button>
+            </form>
+        </div>
+
+        <div class="cart-summary-card" style="position: sticky; top: 100px;">
+            <h3>Order Summary</h3>
+            <div style="border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); padding: 1rem 0; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span>Subtotal:</span>
+                    <span>${{ "{:,.2f}".format(total) }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span>Taxes (5%):</span>
+                    <span>${{ "{:,.2f}".format(tax) }}</span>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.25rem;">
+                <span>Total:</span>
+                <span>${{ "{:,.2f}".format(grand_total) }}</span>
+            </div>
+        </div>
+    </div>
+{% endblock %}

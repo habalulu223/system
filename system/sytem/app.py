@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from flask_bcrypt import Bcrypt
 from functools import wraps
+from datetime import datetime  # <-- This import is needed for orders
 
 app = Flask(__name__)
 
@@ -26,6 +27,10 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(60), nullable=False)
     cart_items = db.relationship('CartItem', backref='owner', lazy=True)
 
+    # --- NEW ADMIN FIELDS ---
+    is_admin = db.Column(db.Boolean, nullable=False, default=False)
+    orders = db.relationship('Order', backref='user', lazy=True)
+
 
 class Bike(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -43,9 +48,39 @@ class CartItem(db.Model):
     bike = db.relationship('Bike')
 
 
+# --- NEW ORDER MODELS ---
+
+class Order(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    total_price = db.Column(db.Float, nullable=False)
+    order_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    order_items = db.relationship('OrderItem', backref='order', lazy=True)
+
+
+class OrderItem(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=False)
+    bike_name = db.Column(db.String(100), nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+
+# --- NEW ADMIN DECORATOR ---
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_admin:
+            flash('You do not have permission to access this page.', 'danger')
+            return redirect(url_for('products'))
+        return f(*args, **kwargs)
+
+    return decorated_function
 
 
 # --- Helper Function to Populate Products ---
@@ -95,13 +130,12 @@ def inject_global_vars():
 # --- General Routes ---
 @app.route('/')
 def index():
-    # UPDATED: The home page is now the login page.
-    # If a user is already logged in, the login() route will redirect them to products.
+    # The home page is now the login page.
     return redirect(url_for('login'))
 
 
 @app.route('/products')
-@login_required  # <-- UPDATED: This page is now protected
+@login_required  # This page is now protected
 def products():
     all_bikes = Bike.query.all()
     return render_template('products.html', bikes=all_bikes)
@@ -225,13 +259,14 @@ def update_cart(item_id):
 @app.route('/checkout', methods=['GET', 'POST'])
 @login_required
 def checkout():
-    cart_items = CartItem.query.filter_by(user_id=current_user.id).all()
+    # Use joinedload to get cart_items AND their related bike info in one query
+    cart_items = CartItem.query.options(db.joinedload(CartItem.bike)).filter_by(user_id=current_user.id).all()
     if not cart_items:
         flash('Your cart is empty.', 'info')
         return redirect(url_for('view_cart'))
 
     total = sum(item.bike.price * item.quantity for item in cart_items)
-    tax = total * 0.05  # 5% tax
+    tax = total * 0.05
     grand_total = total + tax
 
     if request.method == 'POST':
@@ -240,14 +275,63 @@ def checkout():
             flash('Please fill in all payment details.', 'danger')
             return render_template('checkout.html', total=total, tax=tax, grand_total=grand_total)
 
+        # --- UPDATED: Create Order History ---
+        # 1. Create the main Order
+        new_order = Order(user_id=current_user.id, total_price=grand_total)
+        db.session.add(new_order)
+        db.session.commit()  # Commit to get new_order.id
+
+        # 2. Create OrderItems for each item in cart
+        for item in cart_items:
+            order_item = OrderItem(
+                order_id=new_order.id,
+                bike_name=item.bike.name,
+                price=item.bike.price,
+                quantity=item.quantity
+            )
+            db.session.add(order_item)
+
+        # 3. Clear the cart
         for item in cart_items:
             db.session.delete(item)
-        db.session.commit()
+
+        db.session.commit()  # Commit all changes
 
         flash('Payment successful! Thank you for your order.', 'success')
         return redirect(url_for('products'))
 
     return render_template('checkout.html', total=total, tax=tax, grand_total=grand_total)
+
+
+# --- NEW ADMIN ROUTES ---
+
+@app.route('/admin')
+@login_required
+@admin_required
+def admin_dashboard():
+    return render_template('admin_dashboard.html')
+
+
+@app.route('/admin/users')
+@login_required
+@admin_required
+def admin_users():
+    users = User.query.all()
+    return render_template('admin_users.html', users=users)
+
+
+@app.route('/admin/sales')
+@login_required
+@admin_required
+def admin_sales():
+    # Load orders, and eager-load the 'user' and 'order_items' relationships
+    # to prevent N+1 queries in the template.
+    orders = Order.query.options(
+        db.joinedload(Order.user),
+        db.joinedload(Order.order_items)
+    ).order_by(Order.order_date.desc()).all()
+
+    return render_template('admin_sales.html', orders=orders)
 
 
 # --- Main Driver ---
